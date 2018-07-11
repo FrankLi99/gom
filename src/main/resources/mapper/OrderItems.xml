@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ghc.dao.IOrderItemsDao">
+    <resultMap id="userOrderWrapper" type="userOrderWrapper">
+        <id column="user_id" property="user.id"/>
+        <result column="userName" property="user.name"/>
+        <result column="email" property="user.password"/>
+        <collection property="ordersList" ofType="orders">
+            <id column="id" property="id"/>
+            <result column="user_id" property="user_id"/>
+            <result column="number" property="number"/>
+            <result column="createtime" property="createtime"/>
+            <result column="note" property="note"/>
+            <!--从表 orderDetail 表映射到 orderDetailList-->
+            <collection property="orderDetailList" ofType="orderDetail">
+                <id column="odtid" property="id"/>
+                <result column="items_id" property="itemsId"/>
+                <result column="items_num" property="itemsNum"/>
+                <result column="orders_id" property="ordersId"/>
+                <!-- 而 orderDetail 这张表的 itemid 外键只对应 items 表中一条数据,所以此处用association-->
+                <association property="item" javaType="items">
+                    <id column="item_id" property="id"/>
+                    <result column="name" property="name"/>
+                    <result column="price" property="price"/>
+                    <result column="detail" property="detail"/>
+                    <result column="pic" property="pic"/>
+                    <result column="createtime" property="createtime"/>
+                </association>
+            </collection>
+        </collection>
+    </resultMap>
+    <select id="queryOrderItems" parameterType="int" resultMap="userOrderWrapper">
+         select o.id,
+       o.user_id,
+       o.number,
+       o.createtime,
+       o.note,
+		u.name as userName,
+        u.email,
+        odt.id as odtid,
+        odt.items_id,
+        odt.items_num,
+        odt.orders_id,
+         i.id as item_id,
+		i.name,
+        i.price,
+        i.detail,
+        i.pic,
+        i.createtime
+	   from t_user u join
+                       t_orders o on u.id = o.user_id
+				   join t_orderdetail odt on o.id = odt.orders_id
+                   join t_items i on odt.items_id = i.id
+                   where u.id=#{id}
+    </select>
+
+
+    <select id="queryItemsById" parameterType="int" resultType="items">
+        select id,name,price,detail,pic,createtime  from t_items where id=#{id}
+    </select>
+
+    <update id="updateItemsById" parameterType="items">
+        update t_items set name=#{name},
+                            price=#{price},
+                            detail=#{detail},
+                            pic=#{pic},
+                            createtime=#{createtime}
+                             where id=#{id}
+    </update>
+
+</mapper>

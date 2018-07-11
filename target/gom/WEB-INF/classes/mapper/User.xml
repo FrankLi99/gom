@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ghc.dao.IUserDao">
+    <resultMap id="mapUser" type="user">
+        <id column="id" property="id"/>
+        <result property="email" column="email"/>
+        <result property="name" column="name"/>
+        <result property="password" column="password"/>
+        <result property="regIP" column="reg_ip"/>
+        <result property="regDate" column="reg_date"/>
+    </resultMap>
+    <sql id="where_name_password">
+        <where>
+            <choose>
+                <when test="name!=null and name!='' and password!=null and password!=''">
+                      name=#{name} and password=#{password}
+                </when>
+                <otherwise>
+                    1=0
+                </otherwise>
+            </choose>
+        </where>
+    </sql>
+    <select id="findUserByNameAndPassword" parameterType="user" resultMap="mapUser">
+       select id,email, name , password , reg_ip  ,  reg_date  from t_user <include refid="where_name_password"/>
+    </select>
+
+    <select id="findUserByName" parameterType="String" resultMap="mapUser">
+        select id,email,name,password,reg_ip,reg_date from t_user where name=#{name};
+    </select>
+
+    <select id="findUserIdByName" parameterType="String" resultType="int">
+        select id from t_user where name=#{name}
+    </select>
+    <insert id="addUser" parameterType="user">
+        insert into t_user(email,name,password,reg_ip,reg_date)
+        values(#{email},#{name},#{password},#{regIP},#{regDate})
+    </insert>
+
+
+</mapper>
